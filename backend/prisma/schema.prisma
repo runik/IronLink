@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication and user management
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  links Link[]
+
+  @@map("users")
+}
+
+// Link model for storing URLs and metadata
+model Link {
+  id          String   @id @default(uuid())
+  originalUrl String   @map("original_url")
+  shortCode   String   @unique @map("short_code")
+  title       String?
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  clickCount  Int      @default(0) @map("click_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  clicks Click[]
+
+  @@map("links")
+}
+
+// Click model for tracking link analytics
+model Click {
+  id        String   @id @default(uuid())
+  linkId    String   @map("link_id")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  referer   String?
+  country   String?
+  city      String?
+  clickedAt DateTime @default(now()) @map("clicked_at")
+  
+  // Relations
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@map("clicks")
+}
