@@ -38,16 +38,7 @@ export class LinksService {
         title,
         description,
         userId,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-      },
+      }
     });
   }
 
@@ -55,18 +46,11 @@ export class LinksService {
     return this.prisma.link.findMany({
       where: { userId },
       include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            clicks: true,
-          },
-        },
+        // _count: {
+        //   select: {
+        //     clicks: true,
+        //   },
+        // },
       },
       orderBy: { createdAt: 'desc' },
     });
