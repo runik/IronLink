@@ -1,24 +1,15 @@
 import { useState } from 'react'
 import { useCreateLink } from '../hooks/useLinks'
-import { useUser } from '../hooks/useAuth'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { AuthModal } from './AuthModal'
 
 export function CreateLinkForm() {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [pendingLinkData, setPendingLinkData] = useState<{
-    originalUrl: string
-    title?: string
-    description?: string
-  } | null>(null)
   
   const createLink = useCreateLink()
-  const { data: user, isLoading: userLoading } = useUser()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,15 +22,7 @@ export function CreateLinkForm() {
       description: description.trim() || undefined,
     }
 
-    // Check if user is authenticated
-    if (!user && !userLoading) {
-      // Store the link data and show auth modal
-      setPendingLinkData(linkData)
-      setShowAuthModal(true)
-      return
-    }
-
-    // User is authenticated, proceed with link creation
+    // Proceed with link creation regardless of authentication status
     createLink.mutate(linkData, {
       onSuccess: () => {
         // Reset form on success
@@ -50,29 +33,12 @@ export function CreateLinkForm() {
     })
   }
 
-  const handleAuthSuccess = () => {
-    // User has successfully authenticated, create the pending link
-    if (pendingLinkData) {
-      createLink.mutate(pendingLinkData, {
-        onSuccess: () => {
-          // Reset form on success
-          setUrl('')
-          setTitle('')
-          setDescription('')
-          setPendingLinkData(null)
-        }
-      })
-    }
-  }
-
   return (
-    <>
-      <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-background">
-        <h2 className="text-lg font-medium text-foreground">Create New Link</h2>
-        
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 rounded-lg bg-background">
+            
       <div>
-        <Label htmlFor="url" className="block mb-1">
-          Enter your long URL
+        <Label htmlFor="url" className="block mb-1 text-lg font-medium text-foreground">
+          Enter your long URL to create a short link
         </Label>
         <Input
           id="url"
@@ -86,8 +52,6 @@ export function CreateLinkForm() {
           inputSize="lg"
         />
       </div>
-
-
 
       <Button
         type="submit"
@@ -111,12 +75,5 @@ export function CreateLinkForm() {
         </div>
       )}
     </form>
-
-    <AuthModal
-      isOpen={showAuthModal}
-      onClose={() => setShowAuthModal(false)}
-      onSuccess={handleAuthSuccess}
-    />
-    </>
   )
 } 
