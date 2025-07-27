@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Index from '@/pages/Index'
+import Index from './pages/Index'
 
 function App() {
   return (
