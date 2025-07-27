@@ -1,17 +1,19 @@
 import { useState } from 'react'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, Plus } from 'lucide-react'
 import { useCreateLink } from '../hooks/useLinks'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import { LinksCreateAnimation } from './LinksCreateAnimation'
 
-export function CreateLinkForm() {
+export function LinksCreate() {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [urlError, setUrlError] = useState('')
   const [createdLink, setCreatedLink] = useState<{ shortCode: string; originalUrl: string } | null>(null)
   const [copied, setCopied] = useState(false)
+  const [isPressing, setIsPressing] = useState(false)
   
   const createLink = useCreateLink()
 
@@ -64,6 +66,9 @@ export function CreateLinkForm() {
       return
     }
 
+    // Trigger press animation
+    setIsPressing(true)
+
     const linkData = {
       originalUrl: validation.formattedUrl!,
       title: title.trim() || undefined,
@@ -84,6 +89,8 @@ export function CreateLinkForm() {
         setDescription('')
         setUrlError('')
         setCopied(false)
+      },
+      onError: () => {
       }
     })
   }
@@ -102,55 +109,51 @@ export function CreateLinkForm() {
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4">
-            
-      <div>
-        <Label htmlFor="url" className="block mb-1 text-lg font-medium text-foreground">
-          Enter your long URL to create a short link
-        </Label>
-        <Input
-          id="url"
-          type="text"
-          value={url}
-          onChange={handleUrlChange}
-          placeholder="https://example.com/very-long-url"
-          required
-          autoComplete="off"
-          variant={urlError || createLink.isError ? "error" : "default"}
-          inputSize="lg"
-        />
-        {urlError && (
-          <div className="text-sm text-red-600 mt-1">
-            {urlError}
+  const resetToForm = () => {
+    setCreatedLink(null)
+    setCopied(false)
+    setIsPressing(false)
+    createLink.reset()
+  }
+
+  const handlePressAnimation = () => {
+    // This callback is called when the animation reaches the first keyframe
+    // You can add any logic here that should happen when the pieces come together
+    console.log('Animation pieces came together!')
+  }
+
+  const errorState = () => {
+    return (
+      <div className="space-y-4 p-4 h-[200px]">      
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="text-sm text-red-800 mb-4">
+            Error: {createLink.error?.message || 'Failed to create link'}
           </div>
-        )}
-      </div>
-
-      <Button
-        type="submit"
-        disabled={createLink.isPending || !url.trim()}
-        variant="default"
-        size="lg"
-        className="w-full"
-      >
-        {createLink.isPending ? 'Creating...' : 'Create Link'}
-      </Button>
-
-      {createLink.isError && (
-        <div className="text-sm text-red-600">
-          Error: {createLink.error?.message || 'Failed to create link'}
+          <Button
+            type="button"
+            onClick={resetToForm}
+            variant="default"
+            size="lg"
+            className="w-full"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {createLink.isSuccess && createdLink && (
+  const successState = () => {
+    return (
+      <div className="space-y-4 p-4 relative h-[200px]">      
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="text-sm text-green-800 mb-2">
             Link created successfully!
           </div>
           <div className="flex items-center gap-2">
             <div className="flex-1 p-2 bg-white border border-green-300 rounded text-sm font-mono text-green-900">
-              {window.location.origin}/{createdLink.shortCode}
+              {window.location.origin}/{createdLink?.shortCode}
             </div>
             <Button
               type="button"
@@ -172,11 +175,69 @@ export function CreateLinkForm() {
               )}
             </Button>
           </div>
-          <div className="text-xs text-green-600 mt-1">
-            Redirects to: {createdLink.originalUrl}
+          <div className="text-xs text-green-600 mt-1 mb-4">
+            Redirects to: {createdLink?.originalUrl}
           </div>
+          <Button
+            type="button"
+            onClick={resetToForm}
+            variant="default"
+            size="lg"
+            className="w-full"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create New Link
+          </Button>
         </div>
-      )}
-    </form>
+      </div>
+    )
+  }
+
+  const formState = () => {
+    return (
+      <form onSubmit={handleSubmit} className="relative space-y-4 p-4 h-[200px]">
+        <div>
+          <Label className="block mb-1 text-lg font-medium text-foreground">
+            Enter your long URL to create a short link
+          </Label>
+          <Input
+            id="url"
+            type="text"
+            value={url}
+            onChange={handleUrlChange}
+            placeholder="https://example.com/very-long-url"
+            // required
+            autoComplete="off"
+            variant={urlError ? "error" : "default"}
+            inputSize="lg"
+          />
+          
+          <div className="text-sm text-red-600 mt-1 min-h-[20px]">
+            {urlError}
+          </div>
+
+        </div>
+
+        <Button
+          type="submit"
+          // disabled={createLink.isPending || !url.trim()}
+          variant="default"
+          size="lg"
+          className="w-full"
+        >
+          {createLink.isPending ? 'Shortening...' : 'Shorten'}
+        </Button>
+      </form>
+    )
+  }
+
+  return (
+    <LinksCreateAnimation isPressing={isPressing} onPress={handlePressAnimation}>
+      <div className="h-[200px]">
+        {createLink.isError && errorState()}
+        {createLink.isSuccess && successState()}
+        {!createLink.isError && !createLink.isSuccess && formState()}
+      </div>
+    </LinksCreateAnimation>
   )
 } 

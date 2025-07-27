@@ -42,10 +42,10 @@ export function LinksList() {
   return (
     <div className="space-y-4 p-4">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Links</h2>
-      <div className="bg-gray-50 rounded-lg py-4 max-h-96 overflow-y-auto">
+      <div className="rounded-lg py-4 max-h-96 overflow-y-auto">
         <div className="space-y-4">
           {links.map((link: Link) => (
-            <div key={link.id} className="group p-4 border rounded-lg bg-background hover:shadow-md transition-all duration-200">
+            <div key={link.id} className="group p-4 border-2 border-gray-100 rounded-lg bg-background hover:shadow-md transition-all duration-200">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h3 className="font-medium text-foreground">
