@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { motion, type TargetAndTransition, type Transition } from 'framer-motion'
+import { useRef, useState, useLayoutEffect } from 'react'
 import pressSvg from '@/assets/press.svg'
 
 interface LinksCreateAnimationProps {
@@ -9,6 +10,29 @@ interface LinksCreateAnimationProps {
 }
 
 export function LinksCreateAnimation({ children, isPressing, onPress }: LinksCreateAnimationProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [animationDistance, setAnimationDistance] = useState(315)
+
+  useLayoutEffect(() => {
+    const updateAnimationDistance = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth
+        // Calculate distance to move the press elements to the center
+        // Assuming press elements are positioned at -130px from edges
+        const pressOffset = 10
+        const distanceToCenter = (containerWidth / 2) + pressOffset
+        console.log(distanceToCenter);
+        setAnimationDistance(distanceToCenter)
+      }
+    }
+
+    updateAnimationDistance()
+    
+    // Update on window resize
+    window.addEventListener('resize', updateAnimationDistance)
+    return () => window.removeEventListener('resize', updateAnimationDistance)
+  }, [])
+
   const transition: Transition = {
     type: "tween",
     ease: "easeIn",
@@ -17,7 +41,7 @@ export function LinksCreateAnimation({ children, isPressing, onPress }: LinksCre
   }
 
   const animatePress: TargetAndTransition = {
-    x: isPressing ? [0, -315, -315, 0] : 0,
+    x: isPressing ? [0, -animationDistance, -animationDistance, 0] : 0,
   }
 
   const animateChildren: TargetAndTransition = {
@@ -25,14 +49,14 @@ export function LinksCreateAnimation({ children, isPressing, onPress }: LinksCre
   }
 
   const handleAnimationUpdate = (latest: any) => {
-    // Check if animation has reached the first keyframe (x: -315)
-    if (isPressing && latest.x === -315 && onPress) {
+    // Check if animation has reached the first keyframe (x: -animationDistance)
+    if (isPressing && latest.x === -animationDistance && onPress) {
       onPress()
     }
   }
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <motion.div 
         className="absolute top-[10px] right-[-130px] z-10"
         animate={animatePress}

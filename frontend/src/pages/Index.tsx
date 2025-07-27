@@ -11,16 +11,10 @@ function Index() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
       <Header />
 
-      <div className="flex-1 flex items-center justify-center px-4 overflow-x-hidden">
+      <div className="flex-1 flex pt-10 sm:pt-50 justify-center px-4 overflow-x-hidden">
         <div className="max-w-2xl w-full">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            {/* Create Link Form */}
             <LinksCreate />
-          </div>
-          <div className="bg-white rounded-2xl shadow-xl p-2 mt-10">
-            {/* Links List - Only visible for authenticated users */}
             {user && <LinksList />}
-          </div>
         </div>
       </div>
     </div>

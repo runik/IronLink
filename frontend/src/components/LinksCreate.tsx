@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Copy, Check, Plus } from 'lucide-react'
+import validator from 'validator'
 import { useCreateLink } from '../hooks/useLinks'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -17,33 +18,32 @@ export function LinksCreate() {
   
   const createLink = useCreateLink()
 
-  // URL validation function
+  // URL validation function using validator library
   const validateAndFormatUrl = (inputUrl: string): { isValid: boolean; formattedUrl?: string; error?: string } => {
-    const trimmedUrl = inputUrl.trim()
+    let trimmedUrl = inputUrl.trim()
     
     if (!trimmedUrl) {
       return { isValid: false, error: 'URL is required' }
     }
 
     // Check if URL already has protocol
-    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
-      try {
-        new URL(trimmedUrl)
-        return { isValid: true, formattedUrl: trimmedUrl }
-      } catch {
-        return { isValid: false, error: 'Invalid URL format' }
-      }
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      trimmedUrl = `https://${trimmedUrl}`
+    }   
+
+    // Use validator library to check if it's a valid URL
+    if (!validator.isURL(trimmedUrl, {
+      protocols: ['http', 'https'],
+      require_protocol: true,
+      require_valid_protocol: true,
+      allow_underscores: true,
+      allow_trailing_dot: false,
+      allow_protocol_relative_urls: false
+    })) {
+      return { isValid: false, error: 'Please enter a valid URL' }
     }
 
-    // Check if it's a valid domain format (e.g., example.com)
-    const domainRegex = /^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,6}$/
-    
-    if (domainRegex.test(trimmedUrl)) {
-      return { isValid: true, formattedUrl: `https://${trimmedUrl}` }
-    }
-    else{
-      return { isValid: false, error: 'Please enter a complete domain (e.g., example.com)' }
-    }
+    return { isValid: true, formattedUrl: trimmedUrl }
   }
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,9 +152,14 @@ export function LinksCreate() {
             Link created successfully!
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex-1 p-2 bg-white border border-green-300 rounded text-sm font-mono text-green-900">
+            <a 
+              href={`${window.location.origin}/${createdLink?.shortCode}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 text-sm font-mono text-green-900 hover:bg-green-50 cursor-pointer transition-colors duration-200 underline decoration-green-400 decoration-2"
+            >
               {window.location.origin}/{createdLink?.shortCode}
-            </div>
+            </a>
             <Button
               type="button"
               onClick={copyToClipboard}
@@ -163,15 +168,9 @@ export function LinksCreate() {
               className="whitespace-nowrap"
             >
               {copied ? (
-                <>
                   <Check className="w-4 h-4 mr-1" />
-                  Copied!
-                </>
               ) : (
-                <>
                   <Copy className="w-4 h-4 mr-1" />
-                  Copy
-                </>
               )}
             </Button>
           </div>
@@ -232,12 +231,14 @@ export function LinksCreate() {
   }
 
   return (
-    <LinksCreateAnimation isPressing={isPressing} onPress={handlePressAnimation}>
-      <div className="h-[200px]">
-        {createLink.isError && errorState()}
-        {createLink.isSuccess && successState()}
-        {!createLink.isError && !createLink.isSuccess && formState()}
-      </div>
-    </LinksCreateAnimation>
+    <div className="bg-white rounded-2xl shadow-xl p-8">
+      <LinksCreateAnimation isPressing={isPressing} onPress={handlePressAnimation}>
+        <div className="h-[200px]">
+          {createLink.isError && errorState()}
+          {createLink.isSuccess && successState()}
+          {!createLink.isError && !createLink.isSuccess && formState()}
+        </div>
+      </LinksCreateAnimation>
+    </div>
   )
 } 
