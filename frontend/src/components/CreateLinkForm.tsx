@@ -70,12 +70,6 @@ export function CreateLinkForm() {
       <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-background">
         <h2 className="text-lg font-medium text-foreground">Create New Link</h2>
         
-        {user && (
-          <div className="text-sm text-green-600 bg-green-50 p-2 rounded">
-            Signed in as: {user.email}
-          </div>
-        )}
-      
       <div>
         <Label htmlFor="url" className="block mb-1">
           Enter your long URL
