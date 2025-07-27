@@ -1,72 +1,22 @@
+version: '3.8'
+
 services:
-  # PostgreSQL Database
-  postgres:
+  ironlink:
     build:
-      context: ./db
+      context: .
       dockerfile: Dockerfile
-    container_name: ironlink-postgres
+    container_name: ironlink-combined
     restart: unless-stopped
+    ports:
+      - "80:80"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://ironlink_user:ironlink_password@localhost:5432/ironlink
     networks:
       - ironlink-network
-
-  # # NestJS Backend
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #     target: production
-  #   container_name: ironlink-backend
-  #   restart: unless-stopped
-  #   environment:
-  #     NODE_ENV: production
-  #     PORT: 3000
-  #     DATABASE_URL: postgresql://ironlink_user:ironlink_password@postgres:5432/ironlink
-  #     DATABASE_HOST: postgres
-  #     DATABASE_PORT: 5432
-  #     DATABASE_NAME: ironlink
-  #     DATABASE_USER: ironlink_user
-  #     DATABASE_PASSWORD: ironlink_password
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - ironlink-network
-  #   healthcheck:
-  #     test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
-
-  # # React Frontend
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #     target: production
-  #   container_name: ironlink-frontend
-  #   restart: unless-stopped
-  #   environment:
-  #     VITE_API_URL: http://localhost:3000
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #   networks:
-  #     - ironlink-network
-  #   healthcheck:
-  #     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
 
 volumes:
   postgres_data:

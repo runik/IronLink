@@ -1,12 +1,18 @@
-# Dependencies
+# Git
+.git
+.gitignore
+
+# Node.js
 node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Production builds
+# Build outputs
 dist
 build
+.next
+.nuxt
 
 # Environment files
 .env
@@ -15,24 +21,15 @@ build
 .env.test.local
 .env.production.local
 
-# IDE files
+# IDE
 .vscode
 .idea
 *.swp
 *.swo
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
-
-# Git
-.git
-.gitignore
-
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
 
 # Logs
 logs
@@ -46,9 +43,6 @@ pids
 
 # Coverage directory used by tools like istanbul
 coverage
-
-# nyc test coverage
-.nyc_output
 
 # Dependency directories
 jspm_packages/
@@ -65,5 +59,21 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env 
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Test files
+*.test.js
+*.spec.js
+test/
+tests/
+
+# Temporary files
+tmp/
+temp/ 
