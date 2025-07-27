@@ -103,7 +103,7 @@ export function CreateLinkForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 rounded-lg bg-background">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4">
             
       <div>
         <Label htmlFor="url" className="block mb-1 text-lg font-medium text-foreground">
