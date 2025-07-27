@@ -12,7 +12,8 @@ import {
   Request, 
   Res,
   HttpCode,
-  HttpRedirectResponse
+  HttpRedirectResponse,
+  NotFoundException
 } from '@nestjs/common';
 import { Response } from 'express';
 import { LinksService } from './links.service';
@@ -20,6 +21,7 @@ import { CreateLinkDto } from './dto/create-link.dto';
 import { UpdateLinkDto } from './dto/update-link.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { get404Page, get500Page } from './templates/error-pages';
 
 @Controller('links')
 export class LinksController {
@@ -88,7 +90,7 @@ export class LinksController {
   }
 
   // Public redirect endpoint - no authentication required
-  @Get('r/:shortCode')
+  @Get('redirect/:shortCode')
   @HttpCode(302)
   async redirect(
     @Param('shortCode') shortCode: string,
@@ -103,21 +105,22 @@ export class LinksController {
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         referer: req.get('Referer'),
-        // Note: For country/city detection, you'd need to integrate with a geolocation service
-        // like MaxMind GeoIP2, IP2Location, or similar
       });
 
       // Redirect to the original URL
       return res.redirect(link.originalUrl);
     } catch (error) {
       console.error('Redirect error:', error);
-      if (error instanceof HttpException) {
-        throw error;
+      
+      // Check if it's a NotFoundException (link doesn't exist)
+      if (error instanceof NotFoundException) {
+        // Return a proper HTML 404 page
+        res.status(404).send(get404Page(shortCode));
+        return;
       }
-      throw new HttpException(
-        'Link not found',
-        HttpStatus.NOT_FOUND
-      );
+      
+      // For other errors, return a generic error page
+      res.status(500).send(get500Page());
     }
   }
 } 

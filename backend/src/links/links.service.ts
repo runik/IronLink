@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLinkDto } from './dto/create-link.dto';
 import { UpdateLinkDto } from './dto/update-link.dto';
-import { randomBytes } from 'crypto';
+import { randomBytes, randomInt } from 'crypto';
 
 @Injectable()
 export class LinksService {
@@ -14,7 +14,7 @@ export class LinksService {
     // Generate short code if not provided
     let shortCode = slug;
     if (!shortCode) {
-      shortCode = this.generateShortCode();
+      shortCode = await this.generateUniqueShortCode();
     }
 
     // Check if short code already exists
@@ -26,7 +26,7 @@ export class LinksService {
       if (slug) {
         throw new ConflictException('This slug is already taken');
       } else {
-        // If auto-generated, try again
+        // If auto-generated, try again with a new code
         return this.create(createLinkDto, userId);
       }
     }
@@ -45,13 +45,6 @@ export class LinksService {
   async findAll(userId: string) {
     return this.prisma.link.findMany({
       where: { userId },
-      include: {
-        // _count: {
-        //   select: {
-        //     clicks: true,
-        //   },
-        // },
-      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -60,13 +53,6 @@ export class LinksService {
     const link = await this.prisma.link.findFirst({
       where: { id, userId },
       include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
         clicks: {
           orderBy: { clickedAt: 'desc' },
           take: 10,
@@ -272,8 +258,47 @@ export class LinksService {
     };
   }
 
-  private generateShortCode(): string {
-    // Generate a 6-character random string
-    return randomBytes(3).toString('base64url').substring(0, 6);
+  private async generateUniqueShortCode(): Promise<string> {
+    const maxAttempts = 10;
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+      const shortCode = this.generateShortCode();
+      
+      // Check if this code already exists
+      const existing = await this.prisma.link.findUnique({
+        where: { shortCode },
+        select: { id: true }
+      });
+      
+      if (!existing) {
+        return shortCode;
+      }
+      
+      attempts++;
+    }
+    
+    // If we've exhausted attempts, use a longer code with timestamp
+    return this.generateShortCodeWithTimestamp();
   }
+
+  private generateShortCode(): string {
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const length = 8; // 62^8 = ~218 trillion combinations
+    
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars[randomInt(0, chars.length)];
+    }
+    
+    return result;
+  }
+
+  private generateShortCodeWithTimestamp(): string {
+    // Fallback: combine random string with timestamp for guaranteed uniqueness
+    const timestamp = Date.now().toString(36); 
+    const randomPart = this.generateShortCode().substring(0, 4);
+    return `${randomPart}${timestamp}`.substring(0, 12); // Max 12 chars
+  }
+
 } 
