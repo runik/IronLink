@@ -1,23 +1,46 @@
 import { useState } from 'react'
 import { useCreateLink } from '../hooks/useLinks'
+import { useUser } from '../hooks/useAuth'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { AuthModal } from './AuthModal'
 
 export function CreateLinkForm() {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingLinkData, setPendingLinkData] = useState<{
+    originalUrl: string
+    title?: string
+    description?: string
+  } | null>(null)
   
   const createLink = useCreateLink()
+  const { data: user, isLoading: userLoading } = useUser()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!url.trim()) return
 
-    createLink.mutate({
+    const linkData = {
       originalUrl: url.trim(),
       title: title.trim() || undefined,
       description: description.trim() || undefined,
-    }, {
+    }
+
+    // Check if user is authenticated
+    if (!user && !userLoading) {
+      // Store the link data and show auth modal
+      setPendingLinkData(linkData)
+      setShowAuthModal(true)
+      return
+    }
+
+    // User is authenticated, proceed with link creation
+    createLink.mutate(linkData, {
       onSuccess: () => {
         // Reset form on success
         setUrl('')
@@ -27,60 +50,60 @@ export function CreateLinkForm() {
     })
   }
 
+  const handleAuthSuccess = () => {
+    // User has successfully authenticated, create the pending link
+    if (pendingLinkData) {
+      createLink.mutate(pendingLinkData, {
+        onSuccess: () => {
+          // Reset form on success
+          setUrl('')
+          setTitle('')
+          setDescription('')
+          setPendingLinkData(null)
+        }
+      })
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-background">
-      <h2 className="text-lg font-medium text-foreground">Create New Link</h2>
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-background">
+        <h2 className="text-lg font-medium text-foreground">Create New Link</h2>
+        
+        {user && (
+          <div className="text-sm text-green-600 bg-green-50 p-2 rounded">
+            Signed in as: {user.email}
+          </div>
+        )}
       
       <div>
-        <label htmlFor="url" className="block text-sm font-medium text-foreground mb-1">
-          URL *
-        </label>
-        <input
+        <Label htmlFor="url" className="block mb-1">
+          Enter your long URL
+        </Label>
+        <Input
           id="url"
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://example.com"
+          placeholder="https://example.com/very-long-url"
           required
-          className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          autoComplete="off"
+          variant={createLink.isError ? "error" : "default"}
+          inputSize="lg"
         />
       </div>
 
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-foreground mb-1">
-          Title (optional)
-        </label>
-        <input
-          id="title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="My awesome link"
-          className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-      </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-foreground mb-1">
-          Description (optional)
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="A brief description of this link"
-          rows={3}
-          className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-      </div>
 
-      <button
+      <Button
         type="submit"
         disabled={createLink.isPending || !url.trim()}
-        className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="default"
+        size="lg"
+        className="w-full"
       >
         {createLink.isPending ? 'Creating...' : 'Create Link'}
-      </button>
+      </Button>
 
       {createLink.isError && (
         <div className="text-sm text-red-600">
@@ -94,5 +117,12 @@ export function CreateLinkForm() {
         </div>
       )}
     </form>
+
+    <AuthModal
+      isOpen={showAuthModal}
+      onClose={() => setShowAuthModal(false)}
+      onSuccess={handleAuthSuccess}
+    />
+    </>
   )
 } 

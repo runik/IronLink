@@ -3,33 +3,13 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { useCreateLink } from '../hooks/useLinks'
+import { useUser, useLogout } from '../hooks/useAuth'
+import { CreateLinkForm } from '../components/CreateLinkForm'
 
 function Index() {
-  const [originalUrl, setOriginalUrl] = useState('')
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  
   const createLink = useCreateLink()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!originalUrl) {
-      return
-    }
-
-    createLink.mutate({
-      originalUrl: originalUrl.trim(),
-      title: title.trim() || undefined,
-      description: description.trim() || undefined,
-    }, {
-      onSuccess: (data) => {
-        // Reset form on success
-        setOriginalUrl('')
-        setTitle('')
-        setDescription('')
-      }
-    })
-  }
+  const { data: user } = useUser()
+  const logout = useLogout()
 
   const copyToClipboard = async (url: string) => {
     try {
@@ -52,69 +32,25 @@ function Index() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">IronLink</h1>
           <p className="text-gray-600">Shorten your links with ease</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label htmlFor="url" className="block mb-2">
-              Enter your long URL *
-            </Label>
-            <Input
-              type="url"
-              id="url"
-              value={originalUrl}
-              onChange={(e) => setOriginalUrl(e.target.value)}
-              placeholder="https://example.com/very-long-url"
-              variant={createLink.isError ? "error" : "default"}
-              inputSize="lg"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="title" className="block mb-2">
-              Title (optional)
-            </Label>
-            <Input
-              type="text"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="My awesome link"
-              inputSize="default"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description" className="block mb-2">
-              Description (optional)
-            </Label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="A brief description of this link"
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {createLink.isError && (
-            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
-              Error: {createLink.error?.message || 'Failed to create link'}
+          
+          {user && (
+            <div className="mt-4 flex items-center justify-center space-x-4">
+              <span className="text-sm text-gray-600">
+                Welcome, {user.name || user.email}
+              </span>
+              <Button
+                onClick={() => logout.mutate()}
+                variant="secondary"
+                size="sm"
+                disabled={logout.isPending}
+              >
+                {logout.isPending ? 'Signing out...' : 'Sign Out'}
+              </Button>
             </div>
           )}
+        </div>
 
-          <Button
-            type="submit"
-            disabled={createLink.isPending || !originalUrl.trim()}
-            variant="default"
-            size="lg"
-            className="w-full"
-          >
-            {createLink.isPending ? 'Creating...' : 'Shorten URL'}
-          </Button>
-        </form>
+        <CreateLinkForm />
 
         {shortenedUrl && (
           <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
@@ -149,14 +85,6 @@ function Index() {
                 <p><strong>Created:</strong> {new Date(createLink.data.createdAt).toLocaleDateString()}</p>
               </div>
             )}
-          </div>
-        )}
-
-        {createLink.isSuccess && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-green-600 font-medium">
-              ✅ Link created successfully!
-            </p>
           </div>
         )}
 
