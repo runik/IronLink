@@ -97,7 +97,7 @@ export class LinksController {
   }
 
   // Public redirect endpoint - no authentication required
-  // Consider adding a rate limit here
+  // Consider adding a rate limit here???
   @SkipThrottle() 
   @Get('redirect/:slug')
   @HttpCode(302)

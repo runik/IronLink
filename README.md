@@ -63,9 +63,7 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
    ```
 
 3. **Access the application**
-   - Frontend: http://localhost:80
-   - Backend API: http://localhost:3000
-   - Database: localhost:5432
+   http://localhost:80
 
 #### Option 2: Using Pre-built Docker Image
 
