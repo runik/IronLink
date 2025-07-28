@@ -27,7 +27,6 @@ ENV PGDATA=/var/lib/postgresql/data
 
 # Copy PostgreSQL initialization scripts
 COPY db/init-db.sql /docker-entrypoint-initdb.d/
-COPY db/scripts/ /docker-entrypoint-initdb.d/
 
 # Copy PostgreSQL configuration
 COPY db/postgresql.conf /etc/postgresql/postgresql.conf
