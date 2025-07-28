@@ -48,6 +48,8 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
 
 ### Quick Start with Docker
 
+#### Option 1: Using Docker Compose (Recommended)
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/runik/IronLink
@@ -63,4 +65,20 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
    - Frontend: http://localhost:80
    - Backend API: http://localhost:3000
    - Database: localhost:5432
+
+#### Option 2: Using Pre-built Docker Image
+
+1. **Pull the Docker image**
+   ```bash
+   docker pull ghcr.io/runik/ironlink:latest
+   ```
+
+2. **Run the container**
+   ```bash
+   docker run -p 80:80 -p 3000:3000 ghcr.io/runik/ironlink:latest
+   ```
+
+3. **Access the application**
+   - Frontend: http://localhost:80
+   - Backend API: http://localhost:3000
 
