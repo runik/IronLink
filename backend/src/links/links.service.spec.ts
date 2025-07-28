@@ -37,11 +37,11 @@ describe('LinksService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('generateShortCode', () => {
-    it('should generate a 6-character string', () => {
-      const shortCode = (service as any).generateShortCode();
-      expect(shortCode).toHaveLength(6);
-      expect(typeof shortCode).toBe('string');
+  describe('generateSlug', () => {
+    it('should generate a 8-character string', () => {
+      const slug = (service as any).generateSlug();
+      expect(slug).toHaveLength(8);
+      expect(typeof slug).toBe('string');
     });
   });
 }); 

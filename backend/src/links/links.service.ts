@@ -11,22 +11,22 @@ export class LinksService {
   async create(createLinkDto: CreateLinkDto, userId: string) {
     const { originalUrl, slug, title, description } = createLinkDto;
 
-    // Generate short code if not provided
-    let shortCode = slug;
-    if (!shortCode) {
-      shortCode = await this.generateUniqueShortCode();
+    // Generate slug if not provided
+    let generatedSlug = slug;
+    if (!generatedSlug) {
+      generatedSlug = await this.generateUniqueSlug();
     }
 
-    // Check if short code already exists
+    // Check if slug already exists
     const existingLink = await this.prisma.link.findUnique({
-      where: { shortCode },
+      where: { slug: generatedSlug },
     });
 
     if (existingLink) {
       if (slug) {
         throw new ConflictException('This slug is already taken');
       } else {
-        // If auto-generated, try again with a new code
+        // If auto-generated, try again with a new slug
         return this.create(createLinkDto, userId);
       }
     }
@@ -34,7 +34,7 @@ export class LinksService {
     return this.prisma.link.create({
       data: {
         originalUrl,
-        shortCode,
+        slug: generatedSlug,
         title,
         description,
         userId,
@@ -72,9 +72,9 @@ export class LinksService {
     return link;
   }
 
-  async findByShortCode(shortCode: string) {
+  async findBySlug(slug: string) {
     const link = await this.prisma.link.findUnique({
-      where: { shortCode },
+      where: { slug },
       include: {
         user: {
           select: {
@@ -109,16 +109,16 @@ export class LinksService {
     const { slug, ...updateData } = updateLinkDto;
 
     // If slug is being updated, check if it's available
-    if (slug && slug !== link.shortCode) {
+    if (slug && slug !== link.slug) {
       const existingLink = await this.prisma.link.findUnique({
-        where: { shortCode: slug },
+        where: { slug },
       });
 
       if (existingLink) {
         throw new ConflictException('This slug is already taken');
       }
 
-      (updateData as any).shortCode = slug;
+      (updateData as any).slug = slug;
     }
 
     return this.prisma.link.update({
@@ -239,7 +239,7 @@ export class LinksService {
       link: {
         id: link.id,
         originalUrl: link.originalUrl,
-        shortCode: link.shortCode,
+        slug: link.slug,
         title: link.title,
         description: link.description,
         isActive: link.isActive,
@@ -258,31 +258,31 @@ export class LinksService {
     };
   }
 
-  private async generateUniqueShortCode(): Promise<string> {
+  private async generateUniqueSlug(): Promise<string> {
     const maxAttempts = 10;
     let attempts = 0;
     
     while (attempts < maxAttempts) {
-      const shortCode = this.generateShortCode();
+      const slug = this.generateSlug();
       
-      // Check if this code already exists
+      // Check if this slug already exists
       const existing = await this.prisma.link.findUnique({
-        where: { shortCode },
+        where: { slug },
         select: { id: true }
       });
       
       if (!existing) {
-        return shortCode;
+        return slug;
       }
       
       attempts++;
     }
     
-    // If we've exhausted attempts, use a longer code with timestamp
-    return this.generateShortCodeWithTimestamp();
+    // If we've exhausted attempts, use a longer slug with timestamp
+    return this.generateSlugWithTimestamp();
   }
 
-  private generateShortCode(): string {
+  private generateSlug(): string {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const length = 8; // 62^8 = ~218 trillion combinations
     
@@ -294,10 +294,10 @@ export class LinksService {
     return result;
   }
 
-  private generateShortCodeWithTimestamp(): string {
+  private generateSlugWithTimestamp(): string {
     // Fallback: combine random string with timestamp for guaranteed uniqueness
     const timestamp = Date.now().toString(36); 
-    const randomPart = this.generateShortCode().substring(0, 4);
+    const randomPart = this.generateSlug().substring(0, 4);
     return `${randomPart}${timestamp}`.substring(0, 12); // Max 12 chars
   }
 

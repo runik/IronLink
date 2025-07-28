@@ -1,4 +1,4 @@
-export const get404Page = (shortCode: string): string => `
+export const get404Page = (slug: string): string => `
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -144,7 +144,7 @@ export const get404Page = (shortCode: string): string => `
           <h1 class="error-code">404</h1>
           <h2 class="error-message">Link Not Found</h2>
           <p class="description">
-            The link with shortcode <span class="shortcode">${shortCode}</span> doesn't exist or has been removed.
+            The link with slug <span class="shortcode">${slug}</span> doesn't exist or has been removed.
           </p>
           <a href="/" class="home-link">Go to Homepage</a>
         </div>

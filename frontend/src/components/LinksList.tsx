@@ -82,7 +82,7 @@ export function LinksList() {
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  {window.location.origin}/{link.shortCode}
+                  {window.location.origin}/{link.slug}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Clicks: {link.clickCount}

@@ -99,15 +99,15 @@ export class LinksController {
   // Public redirect endpoint - no authentication required
   // Consider adding a rate limit here
   @SkipThrottle() 
-  @Get('redirect/:shortCode')
+  @Get('redirect/:slug')
   @HttpCode(302)
   async redirect(
-    @Param('shortCode') shortCode: string,
+    @Param('slug') slug: string,
     @Request() req,
     @Res() res: Response
   ) {
     try {
-      const link = await this.linksService.findByShortCode(shortCode);
+      const link = await this.linksService.findBySlug(slug);
       
       // Track the click
       await this.linksService.trackClick(link.id, {
@@ -124,7 +124,7 @@ export class LinksController {
       // Check if it's a NotFoundException (link doesn't exist)
       if (error instanceof NotFoundException) {
         // Return a proper HTML 404 page
-        res.status(404).send(get404Page(shortCode));
+        res.status(404).send(get404Page(slug));
         return;
       }
       

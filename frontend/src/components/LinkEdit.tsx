@@ -28,7 +28,7 @@ export function LinkEdit({
 }: LinkEditProps) {
   const [editForm, setEditForm] = useState({
     title: '',
-    shortCode: '',
+    slug: '',
     originalUrl: '',
   })
 
@@ -37,7 +37,7 @@ export function LinkEdit({
     if (link) {
       setEditForm({
         title: link.title || '',
-        shortCode: link.shortCode,
+        slug: link.slug,
         originalUrl: link.originalUrl
       })
     }
@@ -49,7 +49,7 @@ export function LinkEdit({
     onSave(link.id, {
       title: editForm.title,
       originalUrl: editForm.originalUrl,
-      slug: editForm.shortCode
+      slug: editForm.slug
     })
   }
 
@@ -59,7 +59,7 @@ export function LinkEdit({
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setEditForm({ title: '', shortCode: '', originalUrl: '' })
+      setEditForm({ title: '', slug: '', originalUrl: '' })
     }
     onOpenChange(open)
   }
@@ -112,7 +112,7 @@ export function LinkEdit({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="shortCode" className="text-sm font-medium">
+            <label htmlFor="slug" className="text-sm font-medium">
               Slug
             </label>
             <div className="flex items-center space-x-2">
@@ -120,10 +120,10 @@ export function LinkEdit({
                 {window.location.origin}/
               </span>
               <Input
-                id="shortCode"
+                id="slug"
                 placeholder="custom-slug"
-                value={editForm.shortCode}
-                onChange={(e) => handleInputChange('shortCode', e.target.value)}
+                value={editForm.slug}
+                onChange={(e) => handleInputChange('slug', e.target.value)}
                 className="flex-1"
               />
             </div>

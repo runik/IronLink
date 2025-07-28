@@ -5,7 +5,7 @@ import { api } from '../lib/api'
 export interface Link {
   id: string
   originalUrl: string
-  shortCode: string
+  slug: string
   title?: string
   description?: string
   createdAt: string

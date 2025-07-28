@@ -14,7 +14,7 @@ export function LinksCreate() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [urlError, setUrlError] = useState('')
-  const [createdLink, setCreatedLink] = useState<{ shortCode: string; originalUrl: string } | null>(null)
+  const [createdLink, setCreatedLink] = useState<{ slug: string; originalUrl: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const [isPressing, setIsPressing] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -97,7 +97,7 @@ export function LinksCreate() {
       onSuccess: (data) => {
         // Store the created link data
         setCreatedLink({
-          shortCode: data.shortCode,
+          slug: data.slug,
           originalUrl: data.originalUrl
         })
         // Reset form on success
@@ -132,7 +132,7 @@ export function LinksCreate() {
   const copyToClipboard = async () => {
     if (!createdLink) return
     
-    const shortUrl = `${window.location.origin}/${createdLink.shortCode}`
+    const shortUrl = `${window.location.origin}/${createdLink.slug}`
     
     try {
       await navigator.clipboard.writeText(shortUrl)
@@ -183,12 +183,12 @@ export function LinksCreate() {
           </div>
           <div className="flex items-center gap-2">
             <a 
-              href={`${window.location.origin}/${createdLink?.shortCode}`}
+              href={`${window.location.origin}/${createdLink?.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 text-sm font-mono text-green-900 hover:bg-green-50 cursor-pointer transition-colors duration-200 underline decoration-green-400 decoration-2"
             >
-              {window.location.origin}/{createdLink?.shortCode}
+              {window.location.origin}/{createdLink?.slug}
             </a>
             <Button
               type="button"
