@@ -76,7 +76,7 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
 
 2. **Run the container**
    ```bash
-   docker run -p 80:80 -p 3000:3000 ghcr.io/runik/ironlink:latest
+   docker run -p 80:80 ghcr.io/runik/ironlink:latest
    ```
 
 3. **Access the application**
