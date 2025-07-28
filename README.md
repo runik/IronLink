@@ -2,7 +2,7 @@
 
 A full-stack URL shortening application built with React, NestJS, and PostgreSQL. IronLink allows users to create shortened URLs, track visits, and manage their links through a user-friendly dashboard.
 
-## 🚀 Features
+## Features
 
 ### ✅ Core Requirements Implemented
 
@@ -23,7 +23,7 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
 - **✅ Analytics Dashboard** - Popularity metrics and visit statistics
 - **✅ Docker Support** - Complete Docker setup for easy deployment
 
-## 🏗️ Architecture
+## Architecture
 
 ### Frontend (React + TypeScript)
 - **Framework**: React with TypeScript
@@ -43,7 +43,7 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
 - **Database**: PostgreSQL for reliable data storage
 - **Migrations**: Automatic schema migrations
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 
 ### Quick Start with Docker
@@ -82,3 +82,20 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
    - Frontend: http://localhost:80
    - Backend API: http://localhost:3000
 
+## Future Improvements
+
+### Testing & Quality Assurance
+- **Enhanced Test Coverage** - Add comprehensive unit and integration tests for both frontend and backend
+- **Playwright E2E Tests** - Implement end-to-end testing with Playwright for critical user flows
+- **CI/CD Pipeline** - Integrate with GitHub Actions for automated testing and deployment
+
+### Performance & Scalability
+- **Data Aggregation** - Implement data aggregation for statistics and click tracking (consider migrating to RedShift for large-scale analytics)
+- **Edge Function Service** - Create a dedicated edge function service for link redirects with KV store for ultra-fast reads
+- **Caching Strategy** - Implement Redis caching for frequently accessed data
+
+### Security Enhancements
+- **CSRF Protection** - Add Cross-Site Request Forgery protection
+- **Clickjacking Prevention** - Implement proper X-Frame-Options and Content Security Policy headers
+- **CORS Configuration** - Fine-tune Cross-Origin Resource Sharing policies
+- **Security Headers** - Implement comprehensive security headers (HSTS, CSP, etc.)
