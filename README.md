@@ -29,6 +29,7 @@ A full-stack URL shortening application built with React, NestJS, and PostgreSQL
 - **Framework**: React with TypeScript
 - **Build Tool**: Vite for fast development
 - **UI**: Radix-UI and Tailwind components with modern styling
+- **Animations**: Framer Motion for smooth animations and transitions
 - **State Management**: React Query for server state
 
 ### Backend (NestJS + TypeScript)
