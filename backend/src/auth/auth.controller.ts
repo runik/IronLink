@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { ThrottleAuth, SkipThrottle } from '../throttler/decorators/throttle.decorator';
 
 export class LoginDto {
   @IsEmail()
@@ -31,6 +32,7 @@ export class RegisterDto {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ThrottleAuth()
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     try {
@@ -49,6 +51,7 @@ export class AuthController {
     }
   }
 
+  @ThrottleAuth()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req, @Body() loginDto: LoginDto) {
@@ -63,6 +66,7 @@ export class AuthController {
     }
   }
 
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@CurrentUser() user) {

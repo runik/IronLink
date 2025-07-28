@@ -22,11 +22,13 @@ import { UpdateLinkDto } from './dto/update-link.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { get404Page, get500Page } from './templates/error-pages';
+import { ThrottleLinkCreation, ThrottleLinkAccess, SkipThrottle } from '../throttler/decorators/throttle.decorator';
 
 @Controller('links')
 export class LinksController {
   constructor(private readonly linksService: LinksService) {}
 
+  @ThrottleLinkCreation()
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createLinkDto: CreateLinkDto, @CurrentUser() user) {
@@ -44,24 +46,28 @@ export class LinksController {
     }
   }
 
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@CurrentUser() user) {
     return this.linksService.findAll(user.id);
   }
 
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user) {
     return this.linksService.findOne(id, user.id);
   }
 
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Get(':id/stats')
   getStats(@Param('id') id: string, @CurrentUser() user) {
     return this.linksService.getStats(id, user.id);
   }
 
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   update(
@@ -83,6 +89,7 @@ export class LinksController {
     }
   }
 
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user) {
@@ -90,6 +97,8 @@ export class LinksController {
   }
 
   // Public redirect endpoint - no authentication required
+  // Consider adding a rate limit here
+  @SkipThrottle() 
   @Get('redirect/:shortCode')
   @HttpCode(302)
   async redirect(
