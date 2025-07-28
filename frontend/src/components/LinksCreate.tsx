@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Copy, Check, Plus } from 'lucide-react'
 import validator from 'validator'
 import { useCreateLink } from '../hooks/useLinks'
