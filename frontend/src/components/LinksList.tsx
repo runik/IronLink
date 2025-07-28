@@ -1,48 +1,28 @@
 import { useLinks, useDeleteLink, useUpdateLink, type Link } from '../hooks/useLinks'
 import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit } from 'lucide-react'
 import { useState } from 'react'
+import { LinkEdit } from './LinkEdit'
 
 export function LinksList() {
   const { data: links, isLoading, error } = useLinks()
   const deleteLink = useDeleteLink()
   const updateLink = useUpdateLink()
   const [editingLink, setEditingLink] = useState<Link | null>(null)
-  const [editForm, setEditForm] = useState({
-    title: '',
-    shortCode: '',
-    originalUrl: '',
-  })
   const [editErrors, setEditErrors] = useState<string[]>([])
-
-  
 
   const handleEditClick = (link: Link) => {
     setEditingLink(link)
-    setEditForm({
-      title: link.title || '',
-      shortCode: link.shortCode,
-      originalUrl: link.originalUrl
-    })
     setEditErrors([])
   }
 
-  const handleSaveEdit = () => {
-    if (!editingLink) return
-
+  const handleSaveEdit = (id: string, data: { title: string; originalUrl: string; slug: string }) => {
     updateLink.mutate({
-      id: editingLink.id,
-      data: {
-        title: editForm.title,
-        originalUrl: editForm.originalUrl,
-        slug: editForm.shortCode
-      }
+      id,
+      data
     }, {
       onSuccess: () => {
         setEditingLink(null)
-        setEditForm({ title: '', shortCode: '', originalUrl: '' })
         setEditErrors([])
       },
       onError: (error: any) => {
@@ -61,7 +41,6 @@ export function LinksList() {
   const handleDelete = (linkId: string) => {
     deleteLink.mutate(linkId)
     setEditingLink(null)
-    setEditForm({ title: '', shortCode: '', originalUrl: '' })
     setEditErrors([])
   }
 
@@ -146,111 +125,21 @@ export function LinksList() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingLink} onOpenChange={(open) => {
-        if (!open) {
-          setEditingLink(null)
-          setEditErrors([])
-        }
-      }}>
-        <DialogContent className="sm:max-w-md" animation="slide">
-          <DialogHeader>
-            <DialogTitle>Edit Link</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            {/* Error Display */}
-            {editErrors.length > 0 && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <div className="text-sm text-red-800 font-medium mb-2">Please fix the following errors:</div>
-                <ul className="text-sm text-red-700 space-y-1">
-                  {editErrors.map((error, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="mr-2">•</span>
-                      <span>{error}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <label htmlFor="title" className="text-sm font-medium">
-                Name (optional)
-              </label>
-              <Input
-                id="title"
-                placeholder="Enter a name for your link"
-                value={editForm.title}
-                onChange={(e) => {
-                  setEditForm(prev => ({ ...prev, title: e.target.value }))
-                  if (editErrors.length > 0) setEditErrors([])
-                }}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="originalUrl" className="text-sm font-medium">
-                Original URL
-              </label>
-              <Input
-                id="originalUrl"
-                placeholder="https://example.com"
-                value={editForm.originalUrl}
-                onChange={(e) => {
-                  setEditForm(prev => ({ ...prev, originalUrl: e.target.value }))
-                  if (editErrors.length > 0) setEditErrors([])
-                }}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="shortCode" className="text-sm font-medium">
-                Slug
-              </label>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">
-                  {window.location.origin}/
-                </span>
-                <Input
-                  id="shortCode"
-                  placeholder="custom-slug"
-                  value={editForm.shortCode}
-                  onChange={(e) => {
-                    setEditForm(prev => ({ ...prev, shortCode: e.target.value }))
-                    if (editErrors.length > 0) setEditErrors([])
-                  }}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex justify-between">
-            <Button
-              variant="destructive"
-              onClick={() => editingLink && handleDelete(editingLink.id)}
-              disabled={deleteLink.isPending}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setEditingLink(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveEdit}
-                disabled={updateLink.isPending}
-              >
-                Save Changes
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <LinkEdit
+        link={editingLink}
+        isOpen={!!editingLink}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingLink(null)
+            setEditErrors([])
+          }
+        }}
+        onSave={handleSaveEdit}
+        onDelete={handleDelete}
+        isPending={updateLink.isPending}
+        isDeletePending={deleteLink.isPending}
+        errors={editErrors}
+      />
     </div>
   )
 } 
