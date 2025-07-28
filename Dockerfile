@@ -1,4 +1,3 @@
-# Multi-stage build for IronLink application
 FROM node:22-alpine AS base
 
 # Install system dependencies
@@ -73,13 +72,14 @@ RUN npm run build
 # ===== FINAL STAGE =====
 FROM base AS production
 
+# Add connetion to github repo
+LABEL org.opencontainers.image.source=https://github.com/runik/IronLink
+
 # Copy built backend from builder stage
 COPY --from=backend-builder /app/backend/dist /app/backend/dist
 COPY --from=backend-builder /app/backend/package*.json /app/backend/
 COPY --from=backend-builder /app/backend/prisma /app/backend/prisma
 COPY --from=backend-builder /app/backend/node_modules/.prisma /app/backend/node_modules/.prisma
-
-
 
 # Install only production backend dependencies
 WORKDIR /app/backend
@@ -107,11 +107,7 @@ COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
 # Expose ports
-EXPOSE 80 5432
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+EXPOSE 80
 
 # Start supervisor to manage all services
 CMD ["/startup.sh"] 
