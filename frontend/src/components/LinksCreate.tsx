@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Copy, Check, Plus } from 'lucide-react'
 import validator from 'validator'
 import { useCreateLink } from '../hooks/useLinks'
+import { useUser } from '../hooks/useAuth'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import { AuthModal } from './AuthModal'
 import { LinksCreateAnimation } from './LinksCreateAnimation'
 
 export function LinksCreate() {
@@ -15,8 +17,11 @@ export function LinksCreate() {
   const [createdLink, setCreatedLink] = useState<{ shortCode: string; originalUrl: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const [isPressing, setIsPressing] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingLinkData, setPendingLinkData] = useState<{ originalUrl: string; title?: string; description?: string } | null>(null)
   
   const createLink = useCreateLink()
+  const { data: user } = useUser()
 
   // URL validation function using validator library
   const validateAndFormatUrl = (inputUrl: string): { isValid: boolean; formattedUrl?: string; error?: string } => {
@@ -66,16 +71,28 @@ export function LinksCreate() {
       return
     }
 
-    // Trigger press animation
-    setIsPressing(true)
-
     const linkData = {
       originalUrl: validation.formattedUrl!,
       title: title.trim() || undefined,
       description: description.trim() || undefined,
     }
 
-    // Proceed with link creation regardless of authentication status
+    // Check if user is authenticated
+    if (!user) {
+      // Store the link data and show auth modal
+      setPendingLinkData(linkData)
+      setShowAuthModal(true)
+      return
+    }
+
+    // User is authenticated, proceed with link creation
+    createLinkWithAnimation(linkData)
+  }
+
+  const createLinkWithAnimation = (linkData: { originalUrl: string; title?: string; description?: string }) => {
+    // Trigger press animation
+    setIsPressing(true)
+
     createLink.mutate(linkData, {
       onSuccess: (data) => {
         // Store the created link data
@@ -89,10 +106,27 @@ export function LinksCreate() {
         setDescription('')
         setUrlError('')
         setCopied(false)
+        setPendingLinkData(null)
       },
       onError: () => {
+        // Reset animation state on error
+        setIsPressing(false)
       }
     })
+  }
+
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false)
+    
+    // If we have pending link data, create the link now
+    if (pendingLinkData) {
+      createLinkWithAnimation(pendingLinkData)
+    }
+  }
+
+  const handleAuthCancel = () => {
+    setShowAuthModal(false)
+    setPendingLinkData(null)
   }
 
   const copyToClipboard = async () => {
@@ -113,14 +147,10 @@ export function LinksCreate() {
     setCreatedLink(null)
     setCopied(false)
     setIsPressing(false)
+    setPendingLinkData(null)
     createLink.reset()
   }
 
-  const handlePressAnimation = () => {
-    // This callback is called when the animation reaches the first keyframe
-    // You can add any logic here that should happen when the pieces come together
-    console.log('Animation pieces came together!')
-  }
 
   const errorState = () => {
     return (
@@ -231,14 +261,22 @@ export function LinksCreate() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
-      <LinksCreateAnimation isPressing={isPressing} onPress={handlePressAnimation}>
-        <div className="h-[200px]">
-          {createLink.isError && errorState()}
-          {createLink.isSuccess && successState()}
-          {!createLink.isError && !createLink.isSuccess && formState()}
-        </div>
-      </LinksCreateAnimation>
-    </div>
+    <>
+      <div className="bg-white rounded-2xl shadow-xl p-8">
+        <LinksCreateAnimation isPressing={isPressing}>
+          <div className="h-[200px]">
+            {createLink.isError && errorState()}
+            {createLink.isSuccess && successState()}
+            {!createLink.isError && !createLink.isSuccess && formState()}
+          </div>
+        </LinksCreateAnimation>
+      </div>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={handleAuthCancel}
+        onSuccess={handleAuthSuccess}
+      />
+    </>
   )
 } 

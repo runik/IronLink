@@ -6,10 +6,9 @@ import pressSvg from '@/assets/press.svg'
 interface LinksCreateAnimationProps {
   children: ReactNode
   isPressing: boolean
-  onPress?: () => void
 }
 
-export function LinksCreateAnimation({ children, isPressing, onPress }: LinksCreateAnimationProps) {
+export function LinksCreateAnimation({ children, isPressing }: LinksCreateAnimationProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [animationDistance, setAnimationDistance] = useState(315)
 
@@ -21,7 +20,6 @@ export function LinksCreateAnimation({ children, isPressing, onPress }: LinksCre
         // Assuming press elements are positioned at -130px from edges
         const pressOffset = 10
         const distanceToCenter = (containerWidth / 2) + pressOffset
-        console.log(distanceToCenter);
         setAnimationDistance(distanceToCenter)
       }
     }
@@ -48,20 +46,12 @@ export function LinksCreateAnimation({ children, isPressing, onPress }: LinksCre
     scaleX: isPressing ? [1, 0.0, 0.0, 1] : 1,
   }
 
-  const handleAnimationUpdate = (latest: any) => {
-    // Check if animation has reached the first keyframe (x: -animationDistance)
-    if (isPressing && latest.x === -animationDistance && onPress) {
-      onPress()
-    }
-  }
-
   return (
     <div ref={containerRef} className="relative">
       <motion.div 
         className="absolute top-[10px] right-[-130px] z-10"
         animate={animatePress}
         transition={transition}
-        onUpdate={handleAnimationUpdate}
       >
         <img src={pressSvg} alt="Press" className="h-[180px] w-auto" />
       </motion.div>

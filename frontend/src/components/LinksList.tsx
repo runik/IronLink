@@ -1,9 +1,10 @@
 import { useLinks, useDeleteLink, useUpdateLink, type Link } from '../hooks/useLinks'
+import { useUser } from '../hooks/useAuth'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
 import { Edit, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function LinksList() {
   const { data: links, isLoading, error } = useLinks()
@@ -16,6 +17,8 @@ export function LinksList() {
     originalUrl: '',
   })
   const [editErrors, setEditErrors] = useState<string[]>([])
+
+  
 
   const handleEditClick = (link: Link) => {
     setEditingLink(link)

@@ -76,6 +76,8 @@ export function useLogout() {
       return Promise.resolve()
     },
     onSuccess: () => {
+      // redirect to home page
+      window.location.href = '/'
       // Clear all queries
       queryClient.clear()
     },
