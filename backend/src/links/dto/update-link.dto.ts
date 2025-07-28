@@ -1,4 +1,5 @@
-import { IsUrl, IsString, IsOptional, MinLength, MaxLength, Matches, IsBoolean } from 'class-validator';
+import { IsUrl, IsString, IsOptional, MinLength, MaxLength, Matches, IsBoolean, Validate } from 'class-validator';
+import { IsNotReservedSlug } from '../validators/reservedSlugs';
 
 export class UpdateLinkDto {
   @IsOptional()
@@ -12,6 +13,7 @@ export class UpdateLinkDto {
   @Matches(/^[a-zA-Z0-9_-]+$/, { 
     message: 'Slug can only contain letters, numbers, hyphens, and underscores' 
   })
+  @Validate(IsNotReservedSlug)
   slug?: string;
 
   @IsOptional()

@@ -3,6 +3,7 @@ import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments 
 @ValidatorConstraint({ name: 'isNotReservedSlug', async: false })
 export class IsNotReservedSlug implements ValidatorConstraintInterface {
   private readonly reservedSlugs = [
+    'api',
     'users',
     'admin',
     'dashboard',
