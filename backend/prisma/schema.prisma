@@ -20,6 +20,7 @@ model User {
   links Link[]
 
   @@map("users")
+  @@index([email])
 }
 
 // Link model for storing URLs and metadata
@@ -29,7 +30,6 @@ model Link {
   slug        String   @unique @map("slug")
   title       String?
   description String?
-  isActive    Boolean  @default(true) @map("is_active")
   clickCount  Int      @default(0) @map("click_count")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -41,6 +41,9 @@ model Link {
   clicks Click[]
 
   @@map("links")
+  @@index([userId])
+  @@index([clickCount])
+  @@index([createdAt])
 }
 
 // Click model for tracking link analytics
@@ -58,4 +61,5 @@ model Click {
   link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
 
   @@map("clicks")
+  @@index([linkId])
 }

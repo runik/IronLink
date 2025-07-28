@@ -26,7 +26,4 @@ export class UpdateLinkDto {
   @MaxLength(500, { message: 'Description must not exceed 500 characters' })
   description?: string;
 
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
 } 

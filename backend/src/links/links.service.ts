@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLinkDto } from './dto/create-link.dto';
 import { UpdateLinkDto } from './dto/update-link.dto';
-import { randomBytes, randomInt } from 'crypto';
+import { randomInt } from 'crypto';
 
 @Injectable()
 export class LinksService {
@@ -88,10 +88,6 @@ export class LinksService {
 
     if (!link) {
       throw new NotFoundException('Link not found');
-    }
-
-    if (!link.isActive) {
-      throw new BadRequestException('Link is inactive');
     }
 
     return link;
@@ -242,7 +238,6 @@ export class LinksService {
         slug: link.slug,
         title: link.title,
         description: link.description,
-        isActive: link.isActive,
         clickCount: link.clickCount,
         createdAt: link.createdAt,
         updatedAt: link.updatedAt,
