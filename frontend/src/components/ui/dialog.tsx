@@ -215,7 +215,7 @@ const DialogContent: React.FC<DialogContentProps> = ({
       <div
         ref={dialogRef}
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-[90%] max-w-lg max-h-[90vh] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg",
+          "fixed left-1/2 top-1/2 z-50 grid w-[90%] max-w-lg max-h-[90vh] -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg",
           getAnimationClasses(),
           "overflow-y-auto rounded-lg sm:w-full shadow-2xl",
           className

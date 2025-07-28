@@ -10,7 +10,7 @@ export interface Link {
   description?: string
   createdAt: string
   updatedAt: string
-  clicks: number
+  clickCount: number
 }
 
 export interface CreateLinkData {
@@ -23,6 +23,7 @@ export interface UpdateLinkData {
   originalUrl?: string
   title?: string
   description?: string
+  slug?: string
 }
 
 // Query keys
